@@ -37,7 +37,7 @@ import lombok.SneakyThrows;
  * A job is executed only once at a time.
  * The scheduler will never execute the same job twice at a time.
  */
-public final class Scheduler {
+public class Scheduler {
 
 	private static final Logger logger = LoggerFactory.getLogger(Scheduler.class);
 
@@ -110,7 +110,7 @@ public final class Scheduler {
 			config.getMaxThreads(),
 			config.getThreadsKeepAliveTime().toMillis(),
 			TimeUnit.MILLISECONDS,
-			new WispThreadFactory()
+			new WispThreadFactory(config.getThreadNamePrefix())
 		);
 		// run job launcher thread
 		Thread launcherThread = new Thread(this::launcher, "Wisp Monitor");
@@ -503,9 +503,15 @@ public final class Scheduler {
 	}
 
 	private static class WispThreadFactory implements ThreadFactory {
+		private String namePrefix;
+
+		public WispThreadFactory(String namePrefix) {
+			this.namePrefix = namePrefix;
+		}
+
 		@Override
 		public Thread newThread(Runnable r) {
-			Thread thread = new Thread(r, "Wisp Scheduler Worker #" + threadCounter.getAndIncrement());
+			Thread thread = new Thread(r, namePrefix + "#" + threadCounter.getAndIncrement());
 			if (thread.isDaemon()) {
 				thread.setDaemon(false);
 			}

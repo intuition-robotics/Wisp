@@ -17,6 +17,7 @@ public class SchedulerConfig {
 
 	public static final TimeProvider DEFAULT_TIME_PROVIDER = new SystemTimeProvider();
 	private static final Duration NON_EXPIRABLE_THREADS = Duration.ofMillis(Long.MAX_VALUE);
+	private static final String DEFAULT_THREAD_NAME_PREFIX = "Wisp Scheduler Worker ";
 
 	/**
 	 * The minimum number of threads that will live in the jobs threads pool.
@@ -35,5 +36,7 @@ public class SchedulerConfig {
 	 * The time provider that will be used by the scheduler
 	 */
 	@Builder.Default private final TimeProvider timeProvider = DEFAULT_TIME_PROVIDER;
+
+	@Builder.Default private final String threadNamePrefix = DEFAULT_THREAD_NAME_PREFIX;
 
 }
