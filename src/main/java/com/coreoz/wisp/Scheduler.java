@@ -1,7 +1,5 @@
 package com.coreoz.wisp;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -12,13 +10,14 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.joda.time.Duration;
+import org.joda.time.Instant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -108,7 +107,7 @@ public class Scheduler {
 		this.threadPoolExecutor = new ScalingThreadPoolExecutor(
 			config.getMinThreads(),
 			config.getMaxThreads(),
-			config.getThreadsKeepAliveTime().toMillis(),
+			config.getThreadsKeepAliveTime().getMillis(),
 			TimeUnit.MILLISECONDS,
 			new WispThreadFactory(config.getThreadNamePrefix())
 		);
@@ -280,7 +279,7 @@ public class Scheduler {
 	 * @throws InterruptedException if the shutdown lasts more than 10 seconds
 	 */
 	public void gracefullyShutdown() {
-		gracefullyShutdown(Duration.ofSeconds(10));
+		gracefullyShutdown(Duration.standardSeconds(10));
 	}
 
 	/**
@@ -313,7 +312,7 @@ public class Scheduler {
 			}
 		}
 
-		threadPoolExecutor.awaitTermination(timeout.toMillis(), TimeUnit.MILLISECONDS);
+		threadPoolExecutor.awaitTermination(timeout.getMillis(), TimeUnit.MILLISECONDS);
 	}
 
 	/**

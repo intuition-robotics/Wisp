@@ -1,6 +1,6 @@
 package com.coreoz.wisp.schedule;
 
-import java.time.Duration;
+import org.joda.time.Duration;
 
 /**
  * Static helpers to build {@link Schedule}

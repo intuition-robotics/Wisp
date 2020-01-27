@@ -3,7 +3,7 @@ package com.coreoz.wisp;
 import static com.coreoz.wisp.Utils.waitOn;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
+import org.joda.time.Duration;
 
 import org.junit.Test;
 
@@ -18,7 +18,7 @@ public class SchedulerThreadPoolTest {
 		Scheduler scheduler = new Scheduler(
 			SchedulerConfig
 				.builder()
-				.threadsKeepAliveTime(Duration.ofMillis(50))
+				.threadsKeepAliveTime(Duration.millis(50))
 				.build()
 		);
 
@@ -96,8 +96,8 @@ public class SchedulerThreadPoolTest {
 		SingleJob job1 = new SingleJob();
 		SingleJob job2 = new SingleJob();
 
-		scheduler.schedule("job1", job1, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
-		scheduler.schedule("job2", job2, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		scheduler.schedule("job1", job1, Schedules.fixedDelaySchedule(Duration.millis(1)));
+		scheduler.schedule("job2", job2, Schedules.fixedDelaySchedule(Duration.millis(1)));
 
 		Thread thread1 = new Thread(() -> {
 			waitOn(job1, () -> job1.countExecuted.get() > 50, 100);

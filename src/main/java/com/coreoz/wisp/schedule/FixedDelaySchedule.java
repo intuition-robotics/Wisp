@@ -1,6 +1,6 @@
 package com.coreoz.wisp.schedule;
 
-import java.time.Duration;
+import org.joda.time.Duration;
 
 public class FixedDelaySchedule implements Schedule {
 
@@ -12,12 +12,12 @@ public class FixedDelaySchedule implements Schedule {
 
 	@Override
 	public long nextExecutionInMillis(long currentTimeInMillis, int executionsCount, Long lastExecutionTimeInMillis) {
-		return currentTimeInMillis + frequency.toMillis();
+		return currentTimeInMillis + frequency.getMillis();
 	}
 
 	@Override
 	public String toString() {
-		return "every " + frequency.toMillis() + "ms";
+		return "every " + frequency.getMillis() + "ms";
 	}
 
 }

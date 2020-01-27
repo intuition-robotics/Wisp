@@ -1,6 +1,6 @@
 package com.coreoz.wisp;
 
-import java.time.Duration;
+import org.joda.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ public class LongRunningJobMonitor implements Runnable {
 
 	private static final Logger logger = LoggerFactory.getLogger(LongRunningJobMonitor.class);
 
-	public static final Duration DEFAULT_THRESHOLD_DETECTION = Duration.ofMinutes(5);
+	public static final Duration DEFAULT_THRESHOLD_DETECTION = Duration.standardMinutes(5);
 
 	private final Scheduler scheduler;
 	private final TimeProvider timeProvider;
@@ -37,7 +37,7 @@ public class LongRunningJobMonitor implements Runnable {
 	public LongRunningJobMonitor(Scheduler scheduler, Duration detectionThreshold, TimeProvider timeProvider) {
 		this.scheduler = scheduler;
 		this.timeProvider = timeProvider;
-		this.detectionThresholdInMillis = detectionThreshold.toMillis();
+		this.detectionThresholdInMillis = detectionThreshold.getMillis();
 
 		this.longRunningJobs = new HashMap<>();
 	}

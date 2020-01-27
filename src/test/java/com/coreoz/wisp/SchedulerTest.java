@@ -4,10 +4,10 @@ import static com.coreoz.wisp.Utils.waitOn;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
-import java.time.Duration;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.assertj.core.data.Offset;
+import org.joda.time.Duration;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,9 +25,9 @@ public class SchedulerTest {
 	public void check_that_two_job_cannot_be_scheduled_with_the_same_name() {
 		Scheduler scheduler = new Scheduler();
 
-		scheduler.schedule("job", Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		scheduler.schedule("job", Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.millis(1)));
 		try {
-			scheduler.schedule("job", Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+			scheduler.schedule("job", Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.millis(1)));
 			fail();
 		} catch (IllegalArgumentException e) {
 			// as expected
@@ -43,7 +43,7 @@ public class SchedulerTest {
 		scheduler.schedule(
 			"test",
 			singleJob,
-			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.ofMillis(1)))
+			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.millis(1)))
 		);
 
 		waitOn(singleJob, () -> singleJob.countExecuted.get() > 0, 10000);
@@ -74,17 +74,17 @@ public class SchedulerTest {
 		scheduler.schedule(
 			"job1",
 			job1,
-			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.ofMillis(1)))
+			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.millis(1)))
 		);
 		scheduler.schedule(
 			"job2",
 			job2,
-			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.ofMillis(1)))
+			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.millis(1)))
 		);
 		scheduler.schedule(
 			"job3",
 			job3,
-			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.ofMillis(1)))
+			Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.millis(1)))
 		);
 		Thread thread1 = new Thread(() -> {
 			waitOn(job1, () -> job1.countExecuted.get() > 0, 10000);
@@ -129,7 +129,7 @@ public class SchedulerTest {
 		);
 		SingleJob job1 = new SingleJob();
 		long beforeExecutionTime = timeProvider.currentTime();
-		Duration jobIntervalTime = Duration.ofMillis(40);
+		Duration jobIntervalTime = Duration.millis(40);
 
 		Job job = scheduler.schedule(
 			"job1",
@@ -144,7 +144,7 @@ public class SchedulerTest {
 		scheduler.gracefullyShutdown();
 
 		assertThat(job.lastExecutionEndedTimeInMillis() - beforeExecutionTime)
-			.isGreaterThanOrEqualTo(jobIntervalTime.toMillis());
+			.isGreaterThanOrEqualTo(jobIntervalTime.getMillis());
 	}
 
 	@Test
@@ -155,7 +155,7 @@ public class SchedulerTest {
 		scheduler.schedule(
 			"job1",
 			job1,
-			Schedules.fixedDelaySchedule(Duration.ofMillis(-1000))
+			Schedules.fixedDelaySchedule(Duration.millis(-1000))
 		);
 		Thread thread1 = new Thread(() -> {
 			waitOn(job1, () -> job1.countExecuted.get() > 0, 500);
@@ -178,13 +178,13 @@ public class SchedulerTest {
 	public void should_shutdown_instantly_if_no_job_is_running() {
 		Scheduler scheduler = new Scheduler();
 
-		scheduler.schedule("job1", () -> {}, Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.ofSeconds(60))));
-		scheduler.schedule("job2", () -> {}, Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.ofSeconds(20))));
+		scheduler.schedule("job1", () -> {}, Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.standardSeconds(60))));
+		scheduler.schedule("job2", () -> {}, Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.standardSeconds(20))));
 
 		long beforeShutdownTime = System.currentTimeMillis();
 		scheduler.gracefullyShutdown();
 
-		assertThat(System.currentTimeMillis() - beforeShutdownTime).isLessThan(Duration.ofSeconds(5).toMillis());
+		assertThat(System.currentTimeMillis() - beforeShutdownTime).isLessThan(Duration.standardSeconds(5).getMillis());
 	}
 
 	@Test
@@ -211,7 +211,7 @@ public class SchedulerTest {
 			}
 		};
 
-		scheduler.schedule("job1", job1, Schedules.fixedDelaySchedule(Duration.ofMillis(3)));
+		scheduler.schedule("job1", job1, Schedules.fixedDelaySchedule(Duration.millis(3)));
 		scheduler.schedule("job2", job2, (currentTimeInMillis, executionsCount, lastExecutionTimeInMillis) -> {
 			if(executionsCount == 0) {
 				return currentTimeInMillis;
@@ -244,7 +244,7 @@ public class SchedulerTest {
 		Job job = scheduler.schedule(
 			runnable,
 			Schedules.afterInitialDelay(
-				Schedules.fixedDelaySchedule(Duration.ofMillis(5)),
+				Schedules.fixedDelaySchedule(Duration.millis(5)),
 				Duration.ZERO
 			)
 		);
@@ -258,7 +258,7 @@ public class SchedulerTest {
 	public void check_that_a_scheduled_job_has_the_right_status() {
 		Scheduler scheduler = new Scheduler();
 
-		Job job = scheduler.schedule(Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.ofSeconds(1)));
+		Job job = scheduler.schedule(Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.standardSeconds(1)));
 
 		assertThat(job.status()).isEqualTo(JobStatus.SCHEDULED);
 
@@ -270,7 +270,7 @@ public class SchedulerTest {
 	public void check_that_a_running_job_has_the_right_status() throws InterruptedException {
 		Scheduler scheduler = new Scheduler();
 
-		Job job = scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job job = scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 		Thread.sleep(40L);
 		assertThat(job.status()).isEqualTo(JobStatus.RUNNING);
 		scheduler.gracefullyShutdown();
@@ -281,9 +281,9 @@ public class SchedulerTest {
 	public void check_that_a_long_running_job_does_not_prevent_other_jobs_to_run() throws InterruptedException {
 		Scheduler scheduler = new Scheduler();
 
-		Job job = scheduler.schedule(Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(10)));
+		Job job = scheduler.schedule(Utils.doNothing(), Schedules.fixedDelaySchedule(Duration.millis(10)));
 		Thread.sleep(25L);
-		scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 		long countBeforeSleep = job.executionsCount();
 		Thread.sleep(50L);
 		scheduler.gracefullyShutdown();
@@ -295,7 +295,7 @@ public class SchedulerTest {
 	public void check_that_metrics_are_correctly_updated_during_and_after_a_job_execution() throws InterruptedException {
 		Scheduler scheduler = new Scheduler();
 
-		Job job = scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job job = scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 
 		Thread.sleep(25L);
 		assertThat(job.executionsCount()).isZero();

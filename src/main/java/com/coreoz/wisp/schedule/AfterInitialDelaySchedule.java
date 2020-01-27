@@ -1,6 +1,6 @@
 package com.coreoz.wisp.schedule;
 
-import java.time.Duration;
+import org.joda.time.Duration;
 
 public class AfterInitialDelaySchedule implements Schedule {
 
@@ -22,7 +22,7 @@ public class AfterInitialDelaySchedule implements Schedule {
 			initialExecutionsCount = executionsCount;
 		}
 		if(initialExecutionsCount >= executionsCount) {
-			return initialDelay.toMillis() + currentTimeInMillis;
+			return initialDelay.getMillis() + currentTimeInMillis;
 		}
 		hasNotBeenExecuted = false;
 		return baseSchedule.nextExecutionInMillis(currentTimeInMillis, executionsCount, lastExecutionTimeInMillis);

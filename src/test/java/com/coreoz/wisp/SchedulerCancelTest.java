@@ -4,7 +4,7 @@ import static com.coreoz.wisp.Utils.doNothing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.fail;
 
-import java.time.Duration;
+import org.joda.time.Duration;
 import java.util.Queue;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -39,7 +39,7 @@ public class SchedulerCancelTest {
 	@Test
 	public void cancel_should_returned_a_job_with_the_done_status() throws Exception {
 		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
-		scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(100)));
+		scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(100)));
 		Job job = scheduler.cancel("doNothing").toCompletableFuture().get(1, TimeUnit.SECONDS);
 
 		assertThat(job).isNotNull();
@@ -56,7 +56,7 @@ public class SchedulerCancelTest {
 	@Test
 	public void second_cancel_should_return_either_the_first_promise_or_either_a_completed_future() throws Exception {
 		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
-		scheduler.schedule("job", Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		scheduler.schedule("job", Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 
 		// so the job can start executing
 		Thread.sleep(20L);
@@ -76,10 +76,10 @@ public class SchedulerCancelTest {
 	@Test
 	public void cancelled_job_should_be_schedulable_again() throws Exception {
 		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
-		scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(100)));
+		scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(100)));
 		scheduler.cancel("doNothing").toCompletableFuture().get(1, TimeUnit.SECONDS);
 
-		Job job = scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(100)));
+		Job job = scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(100)));
 
 		assertThat(job).isNotNull();
 		assertThat(job.status()).isEqualTo(JobStatus.SCHEDULED);
@@ -107,8 +107,8 @@ public class SchedulerCancelTest {
 			}
 		};
 
-		Job job1 = scheduler.schedule(jobProcess1, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
-		Job job2 = scheduler.schedule(jobProcess2, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job job1 = scheduler.schedule(jobProcess1, Schedules.fixedDelaySchedule(Duration.millis(1)));
+		Job job2 = scheduler.schedule(jobProcess2, Schedules.fixedDelaySchedule(Duration.millis(1)));
 
 		Thread.sleep(20);
 
@@ -143,8 +143,8 @@ public class SchedulerCancelTest {
 			}
 		};
 
-		Job job1 = scheduler.schedule("Job 1", jobProcess1, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
-		scheduler.schedule("Job 2", jobProcess2, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job job1 = scheduler.schedule("Job 1", jobProcess1, Schedules.fixedDelaySchedule(Duration.millis(1)));
+		scheduler.schedule("Job 2", jobProcess2, Schedules.fixedDelaySchedule(Duration.millis(1)));
 
 		Thread.sleep(30);
 		assertThat(job1.status()).isEqualTo(JobStatus.READY);
@@ -169,11 +169,11 @@ public class SchedulerCancelTest {
 	public void scheduling_a_done_job_should_keep_its_previous_stats() throws InterruptedException, ExecutionException, TimeoutException {
 		Scheduler scheduler = new Scheduler();
 
-		Job job = scheduler.schedule("job", doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job job = scheduler.schedule("job", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(1)));
 		Thread.sleep(25L);
 
 		scheduler.cancel("job").toCompletableFuture().get(1, TimeUnit.SECONDS);
-		Job newJob = scheduler.schedule("job", doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job newJob = scheduler.schedule("job", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(1)));
 		scheduler.gracefullyShutdown();
 
 		assertThat(newJob.executionsCount()).isGreaterThanOrEqualTo(job.executionsCount());
@@ -184,7 +184,7 @@ public class SchedulerCancelTest {
 	public void check_that_a_done_job_scheduled_again_keeps_its_scheduler_stats() throws InterruptedException, ExecutionException, TimeoutException {
 		Scheduler scheduler = new Scheduler();
 
-		Job job = scheduler.schedule("job", doNothing(), Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job job = scheduler.schedule("job", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(1)));
 		Thread.sleep(25L);
 
 		scheduler.cancel("job").toCompletableFuture().get(1, TimeUnit.SECONDS);

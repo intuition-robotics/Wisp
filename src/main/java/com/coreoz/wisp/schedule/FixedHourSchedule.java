@@ -1,35 +1,35 @@
 package com.coreoz.wisp.schedule;
 
-import java.time.Instant;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.LocalTime;
 
 public class FixedHourSchedule implements Schedule {
 
 	private final LocalTime executionTime;
-	private final ZoneId zoneId;
+	private final DateTimeZone zoneId;
 
 	/**
 	 * Parse time in the form of "hh:mm" or "hh:mm:ss"
 	 */
 	public FixedHourSchedule(String every) {
-		this(LocalTime.parse(every));
+		this(
+			LocalTime.parse(every)
+		);
 	}
 
 	/**
 	 * Parse time in the form of "hh:mm" or "hh:mm:ss"
 	 */
-	public FixedHourSchedule(String every, ZoneId zoneId) {
+	public FixedHourSchedule(String every, DateTimeZone zoneId) {
 		this(LocalTime.parse(every), zoneId);
 	}
 
 	public FixedHourSchedule(LocalTime every) {
-		this(every, ZoneId.systemDefault());
+		this(every, DateTimeZone.getDefault());
 	}
 
-	public FixedHourSchedule(LocalTime every, ZoneId zoneId) {
+	public FixedHourSchedule(LocalTime every, DateTimeZone zoneId) {
 		this.executionTime = every;
 		this.zoneId = zoneId;
 	}
@@ -38,7 +38,7 @@ public class FixedHourSchedule implements Schedule {
 		return executionTime;
 	}
 
-	public ZoneId zoneId() {
+	public DateTimeZone zoneId() {
 		return zoneId;
 	}
 
@@ -49,25 +49,23 @@ public class FixedHourSchedule implements Schedule {
 	}
 
 	long durationUntilNextExecutionInMillis(long currentTimeInMillis, Long lastExecutionTimeInMillis) {
-		ZonedDateTime currentDateTime = Instant
+		DateTime currentDateTime = org.joda.time.Instant
 				.ofEpochMilli(currentTimeInMillis)
-				.atZone(zoneId);
+			.toDateTime(zoneId);
 
-		return currentDateTime
-			.until(
-				nextExecutionDateTime(
-					currentDateTime,
-					lastExecutionTimeInMillis != null && lastExecutionTimeInMillis == currentTimeInMillis
-				),
-				ChronoUnit.MILLIS
-			);
+		return nextExecutionDateTime(
+			currentDateTime,
+			lastExecutionTimeInMillis != null && lastExecutionTimeInMillis == currentTimeInMillis
+		).minus(
+			currentDateTime.getMillis()
+		).getMillis();
 	}
 
-	private ZonedDateTime nextExecutionDateTime(ZonedDateTime currentDateTime, boolean nextExecutionShouldBeNextDay) {
+	private DateTime nextExecutionDateTime(DateTime currentDateTime, boolean nextExecutionShouldBeNextDay) {
 		if(!nextExecutionShouldBeNextDay && currentDateTime.toLocalTime().compareTo(executionTime) <= 0) {
-			return executionTime.atDate(currentDateTime.toLocalDate()).atZone(zoneId);
+			return currentDateTime.toLocalDate().toDateTime(executionTime, zoneId);
 		}
-		return executionTime.atDate(currentDateTime.toLocalDate()).plusDays(1).atZone(zoneId);
+		return currentDateTime.toLocalDate().toDateTime(executionTime, zoneId).plusDays(1);
 	}
 
 	@Override
