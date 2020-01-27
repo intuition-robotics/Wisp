@@ -2,11 +2,12 @@ package com.coreoz.wisp.schedule.cron;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
+import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
+import org.joda.time.Duration;
+import org.joda.time.LocalDate;
 
+import org.joda.time.LocalTime;
 import org.junit.Test;
 
 public class CronScheduleTest {
@@ -16,7 +17,7 @@ public class CronScheduleTest {
 		CronSchedule everyMinuteScheduler = CronSchedule.parseUnixCron("* * * * *");
 
 		assertThat(everyMinuteScheduler.nextExecutionInMillis(0, 0, null))
-		.isEqualTo(Duration.ofMinutes(1).toMillis());
+		.isEqualTo(Duration.standardMinutes(1).getMillis());
 	}
 
 	@Test
@@ -24,23 +25,22 @@ public class CronScheduleTest {
 		CronSchedule everyMinuteScheduler = CronSchedule.parseQuartzCron("0 * * * * ? *");
 
 		assertThat(everyMinuteScheduler.nextExecutionInMillis(0, 0, null))
-		.isEqualTo(Duration.ofMinutes(1).toMillis());
+		.isEqualTo(Duration.standardMinutes(1).getMillis());
 	}
 
 	@Test
 	public void should_not_executed_daily_jobs_twice_a_day() {
 		CronSchedule everyMinuteScheduler = CronSchedule.parseQuartzCron("0 0 12 * * ? *");
 
-		ZonedDateTime augustMidday = LocalDate
-			.of(2016, 8, 31)
-			.atTime(12, 0)
-			.atZone(ZoneId.systemDefault());
-		long midday = augustMidday.toEpochSecond() * 1000;
+		DateTime augustMidday = new LocalDate(2016, 8, 31)
+			.toLocalDateTime(new LocalTime(12,0))
+			.toDateTime(DateTimeZone.getDefault());
+		long midday = augustMidday.getMillis();
 
 		assertThat(everyMinuteScheduler.nextExecutionInMillis(midday-1, 0, null))
 		.isEqualTo(midday);
 		assertThat(everyMinuteScheduler.nextExecutionInMillis(midday, 0, null))
-		.isEqualTo(midday + Duration.ofDays(1).toMillis());
+		.isEqualTo(midday + Duration.standardDays(1).getMillis());
 	}
 
 }

@@ -1,6 +1,6 @@
 package com.coreoz.wisp;
 
-import java.time.Instant;
+import org.joda.time.Instant;
 
 import com.coreoz.wisp.schedule.Schedule;
 

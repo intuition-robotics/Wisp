@@ -2,7 +2,7 @@ package com.coreoz.wisp.schedule;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
+import org.joda.time.Duration;
 
 import org.junit.Test;
 
@@ -13,7 +13,7 @@ public class OnceScheduleTest {
 
 	@Test
 	public void should_not_rely_only_on_job_executions_count() {
-		Schedule onceAfter5ms = Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.ofMillis(5)));
+		Schedule onceAfter5ms = Schedules.executeOnce(Schedules.fixedDelaySchedule(Duration.millis(5)));
 
 		assertThat(onceAfter5ms.nextExecutionInMillis(0, 2, null)).isEqualTo(5);
 		assertThat(onceAfter5ms.nextExecutionInMillis(0, 2, null)).isEqualTo(5);

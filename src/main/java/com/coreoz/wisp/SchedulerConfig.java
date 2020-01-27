@@ -1,9 +1,9 @@
 package com.coreoz.wisp;
 
-import java.time.Duration;
-
 import com.coreoz.wisp.time.SystemTimeProvider;
 import com.coreoz.wisp.time.TimeProvider;
+
+import org.joda.time.Duration;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -16,7 +16,7 @@ import lombok.Getter;
 public class SchedulerConfig {
 
 	public static final TimeProvider DEFAULT_TIME_PROVIDER = new SystemTimeProvider();
-	private static final Duration NON_EXPIRABLE_THREADS = Duration.ofMillis(Long.MAX_VALUE);
+	private static final Duration NON_EXPIRABLE_THREADS = Duration.millis(Long.MAX_VALUE);
 	private static final String DEFAULT_THREAD_NAME_PREFIX = "Wisp Scheduler Worker ";
 
 	/**

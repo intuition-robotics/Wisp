@@ -2,9 +2,9 @@ package com.coreoz.wisp;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.Duration;
-
 import org.junit.Test;
+
+import org.joda.time.Duration;
 
 import com.coreoz.wisp.Utils.SingleJob;
 import com.coreoz.wisp.schedule.Schedules;
@@ -25,12 +25,12 @@ public class SchedulerShutdownTest {
 	public void second_shutdown_should_still_wait_for_its_timeout() throws InterruptedException {
 		Scheduler scheduler = new Scheduler();
 
-		scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 		// so the job can start executing
 		Thread.sleep(20L);
 
 		try {
-			scheduler.gracefullyShutdown(Duration.ofMillis(20)); // this will throw the exception
+			scheduler.gracefullyShutdown(Duration.millis(20)); // this will throw the exception
 			throw new InterruptedException(); // so the compiler is happy
 		} catch (InterruptedException e) {
 			// as excepted
@@ -45,7 +45,7 @@ public class SchedulerShutdownTest {
 	public void ready_job_should_finish_without_being_executed_during_shutdown() throws InterruptedException {
 		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
 
-		scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 		// so the job can start executing
 		Thread.sleep(20L);
 		SingleJob jobThatExecuteInTwoseconds = new SingleJob() {
@@ -59,7 +59,7 @@ public class SchedulerShutdownTest {
 				}
 			}
 		};
-		Job jobThatWillNotBeExecuted = scheduler.schedule(jobThatExecuteInTwoseconds, Schedules.fixedDelaySchedule(Duration.ofMillis(1)));
+		Job jobThatWillNotBeExecuted = scheduler.schedule(jobThatExecuteInTwoseconds, Schedules.fixedDelaySchedule(Duration.millis(1)));
 		// so the job can be ready to be executed
 		Thread.sleep(20L);
 
