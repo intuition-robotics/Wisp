@@ -1,12 +1,13 @@
 package com.coreoz.wisp.stats;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor(staticName = "of")
 public class SchedulerStats {
-
 	private final ThreadPoolStats threadPoolStats;
 
+	public SchedulerStats(ThreadPoolStats threadPoolStats) {
+		this.threadPoolStats = threadPoolStats;
+	}
+
+	public ThreadPoolStats getThreadPoolStats() {
+		return threadPoolStats;
+	}
 }

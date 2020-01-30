@@ -121,8 +121,7 @@ public class SchedulerTest {
 	@Test
 	public void should_not_launch_job_early() throws InterruptedException {
 		SystemTimeProvider timeProvider = new SystemTimeProvider();
-		Scheduler scheduler = new Scheduler(SchedulerConfig
-			.builder()
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder()
 			.maxThreads(1)
 			.timeProvider(timeProvider)
 			.build()
@@ -197,7 +196,7 @@ public class SchedulerTest {
 
 	@Test
 	public void exception_in_schedule_should_not_alter_scheduler() throws InterruptedException {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 
 		AtomicBoolean isJob1ExecutedAfterJob2 = new AtomicBoolean(false);
 		SingleJob job2 = new SingleJob();

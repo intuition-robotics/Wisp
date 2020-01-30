@@ -17,8 +17,6 @@ import org.junit.Test;
 import com.coreoz.wisp.Utils.SingleJob;
 import com.coreoz.wisp.schedule.Schedules;
 
-import lombok.Value;
-
 /**
  * Tests about {@link Scheduler#cancel(String)} only
  */
@@ -26,7 +24,7 @@ public class SchedulerCancelTest {
 
 	@Test
 	public void cancel_should_throw_IllegalArgumentException_if_the_job_name_does_not_exist() {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 		try {
 			scheduler.cancel("job that does not exist");
 			fail("Should not accept to cancel a job that does not exist");
@@ -38,7 +36,7 @@ public class SchedulerCancelTest {
 
 	@Test
 	public void cancel_should_returned_a_job_with_the_done_status() throws Exception {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 		scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(100)));
 		Job job = scheduler.cancel("doNothing").toCompletableFuture().get(1, TimeUnit.SECONDS);
 
@@ -55,7 +53,7 @@ public class SchedulerCancelTest {
 
 	@Test
 	public void second_cancel_should_return_either_the_first_promise_or_either_a_completed_future() throws Exception {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 		scheduler.schedule("job", Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 
 		// so the job can start executing
@@ -75,7 +73,7 @@ public class SchedulerCancelTest {
 
 	@Test
 	public void cancelled_job_should_be_schedulable_again() throws Exception {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 		scheduler.schedule("doNothing", doNothing(), Schedules.fixedDelaySchedule(Duration.millis(100)));
 		scheduler.cancel("doNothing").toCompletableFuture().get(1, TimeUnit.SECONDS);
 
@@ -92,7 +90,7 @@ public class SchedulerCancelTest {
 	@Test
 	public void cancelling_a_job_should_wait_until_it_is_terminated_and_other_jobs_should_continue_running()
 			throws InterruptedException, ExecutionException, TimeoutException {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 
 		SingleJob jobProcess1 = new SingleJob();
 		SingleJob jobProcess2 = new SingleJob() {
@@ -128,7 +126,7 @@ public class SchedulerCancelTest {
 
 	@Test
 	public void a_job_should_be_cancelled_immediatly_if_it_has_the_status_ready() throws InterruptedException, ExecutionException, TimeoutException {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 
 		SingleJob jobProcess1 = new SingleJob();
 		SingleJob jobProcess2 = new SingleJob() {
@@ -192,7 +190,7 @@ public class SchedulerCancelTest {
 
 		Queue<ScheduledExecution> scheduledExecutions = new ConcurrentLinkedQueue<>();
 		scheduler.schedule("job", doNothing(), (long currentTimeInMillis, int executionsCount, Long lastExecutionEndedTimeInMillis) -> {
-			scheduledExecutions.add(ScheduledExecution.of(currentTimeInMillis, executionsCount, lastExecutionEndedTimeInMillis));
+			scheduledExecutions.add(new ScheduledExecution(currentTimeInMillis, executionsCount, lastExecutionEndedTimeInMillis));
 			return currentTimeInMillis;
 		});
 		Thread.sleep(25L);
@@ -205,11 +203,17 @@ public class SchedulerCancelTest {
 		}
 	}
 
-	@Value(staticConstructor = "of")
 	private static final class ScheduledExecution {
 		private long currentTimeInMillis;
 		private int executionsCount;
 		private Long lastExecutionEndedTimeInMillis;
+
+		private ScheduledExecution(long currentTimeInMillis, int executionsCount,
+			Long lastExecutionEndedTimeInMillis) {
+			this.currentTimeInMillis = currentTimeInMillis;
+			this.executionsCount = executionsCount;
+			this.lastExecutionEndedTimeInMillis = lastExecutionEndedTimeInMillis;
+		}
 	}
 
 }

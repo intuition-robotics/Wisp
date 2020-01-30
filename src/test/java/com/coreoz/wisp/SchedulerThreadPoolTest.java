@@ -16,8 +16,7 @@ public class SchedulerThreadPoolTest {
 	@Test
 	public void thread_pool_should_scale_down_when_no_more_tasks_need_executing() throws InterruptedException {
 		Scheduler scheduler = new Scheduler(
-			SchedulerConfig
-				.builder()
+			new SchedulerConfig.Builder()
 				.threadsKeepAliveTime(Duration.millis(50))
 				.build()
 		);
