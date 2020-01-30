@@ -43,7 +43,7 @@ public class SchedulerShutdownTest {
 
 	@Test
 	public void ready_job_should_finish_without_being_executed_during_shutdown() throws InterruptedException {
-		Scheduler scheduler = new Scheduler(SchedulerConfig.builder().maxThreads(1).build());
+		Scheduler scheduler = new Scheduler(new SchedulerConfig.Builder().maxThreads(1).build());
 
 		scheduler.schedule(Utils.TASK_THAT_SLEEPS_FOR_200MS, Schedules.fixedDelaySchedule(Duration.millis(1)));
 		// so the job can start executing

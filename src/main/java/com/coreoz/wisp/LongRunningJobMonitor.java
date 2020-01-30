@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 
 import com.coreoz.wisp.time.TimeProvider;
 
-import lombok.AllArgsConstructor;
-
 /**
  * Detect jobs that are running for too long.
  * When a job is running for too long, a warning message is being logged.
@@ -121,14 +119,14 @@ public class LongRunningJobMonitor implements Runnable {
 
 			long jobExecutionDuration = 0L;
 			if(jobExecutionsCount == jobRunningInfo.executionsCount + 1) {
-				jobExecutionDuration = jobLastExecutionTimeInMillis - jobRunningInfo.jobStartedtimeInMillis;
+				jobExecutionDuration = jobLastExecutionTimeInMillis - jobRunningInfo.jobStartedInMillis;
 				logger.info(
 					"Job '{}' has finished executing after {}ms",
 					job.name(),
 					jobExecutionDuration
 				);
 			} else {
-				jobExecutionDuration = currentTime - jobRunningInfo.jobStartedtimeInMillis;
+				jobExecutionDuration = currentTime - jobRunningInfo.jobStartedInMillis;
 				logger.info(
 					"Job '{}' has finished executing after about {}ms",
 					job.name(),
@@ -143,10 +141,14 @@ public class LongRunningJobMonitor implements Runnable {
 		return null;
 	}
 
-	@AllArgsConstructor
 	private static class LongRunningJobInfo {
-		final long jobStartedtimeInMillis;
+		final long jobStartedInMillis;
 		final int executionsCount;
+
+		private LongRunningJobInfo(long jobStartedInMillis, int executionsCount) {
+			this.jobStartedInMillis = jobStartedInMillis;
+			this.executionsCount = executionsCount;
+		}
 	}
 
 }

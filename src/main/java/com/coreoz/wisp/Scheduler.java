@@ -27,8 +27,6 @@ import com.coreoz.wisp.stats.ThreadPoolStats;
 import com.coreoz.wisp.time.SystemTimeProvider;
 import com.coreoz.wisp.time.TimeProvider;
 
-import lombok.SneakyThrows;
-
 /**
  * A {@code Scheduler} instance reference a group of jobs
  * and is responsible to schedule these jobs at the expected time.<br/>
@@ -72,7 +70,7 @@ public class Scheduler {
 	 * Create a scheduler with the defaults defined at {@link SchedulerConfig}
 	 */
 	public Scheduler() {
-		this(SchedulerConfig.builder().build());
+		this(new SchedulerConfig.Builder().build());
 	}
 
 	/**
@@ -82,7 +80,7 @@ public class Scheduler {
 	 * @throws IllegalArgumentException if {@code maxThreads <= 0}
 	 */
 	public Scheduler(int maxThreads) {
-		this(SchedulerConfig.builder().maxThreads(maxThreads).build());
+		this(new SchedulerConfig.Builder().maxThreads(maxThreads).build());
 	}
 
 	/**
@@ -138,8 +136,7 @@ public class Scheduler {
 	@Deprecated
 	public Scheduler(int maxThreads, long minimumDelayInMillisToReplaceJob,
 			TimeProvider timeProvider) {
-		this(SchedulerConfig
-			.builder()
+		this(new SchedulerConfig.Builder()
 			.maxThreads(maxThreads)
 			.timeProvider(timeProvider)
 			.build()
@@ -288,8 +285,7 @@ public class Scheduler {
 	 * @param timeout The maximum time to wait
 	 * @throws InterruptedException if the shutdown lasts more than 10 seconds
 	 */
-	@SneakyThrows
-	public void gracefullyShutdown(Duration timeout) {
+	public void gracefullyShutdown(Duration timeout)  {
 		logger.info("Shutting down...");
 
 		if(!shuttingDown) {
@@ -312,7 +308,11 @@ public class Scheduler {
 			}
 		}
 
-		threadPoolExecutor.awaitTermination(timeout.getMillis(), TimeUnit.MILLISECONDS);
+		try {
+			threadPoolExecutor.awaitTermination(timeout.getMillis(), TimeUnit.MILLISECONDS);
+		} catch (InterruptedException ex) {
+			throw new RuntimeException(ex);
+		}
 	}
 
 	/**
@@ -320,7 +320,7 @@ public class Scheduler {
 	 */
 	public SchedulerStats stats() {
 		int activeThreads = threadPoolExecutor.getActiveCount();
-		return SchedulerStats.of(ThreadPoolStats.of(
+		return new SchedulerStats(new ThreadPoolStats(
 			threadPoolExecutor.getCorePoolSize(),
 			threadPoolExecutor.getMaximumPoolSize(),
 			activeThreads,
@@ -409,7 +409,6 @@ public class Scheduler {
 	 * The daemon that will be in charge of placing the jobs in the thread pool
 	 * when they are ready to be executed.
 	 */
-	@SneakyThrows
 	private void launcher() {
 		while(!shuttingDown) {
 			Long timeBeforeNextExecution = null;
@@ -425,18 +424,22 @@ public class Scheduler {
 					if(shuttingDown) {
 						return;
 					}
-					// If someone has notified the launcher
-					// then the launcher must check again the next job to execute.
-					// We must be sure not to miss any changes that would have
-					// happened after the timeBeforeNextExecution calculation.
-					if(launcherNotifier.get()) {
-						if(timeBeforeNextExecution == null) {
-							launcherNotifier.wait();
-						} else {
-							launcherNotifier.wait(timeBeforeNextExecution);
+					try {
+						// If someone has notified the launcher
+						// then the launcher must check again the next job to execute.
+						// We must be sure not to miss any changes that would have
+						// happened after the timeBeforeNextExecution calculation.
+						if (launcherNotifier.get()) {
+							if (timeBeforeNextExecution == null) {
+								launcherNotifier.wait();
+							} else {
+								launcherNotifier.wait(timeBeforeNextExecution);
+							}
 						}
+						launcherNotifier.set(true);
+					} catch (InterruptedException ex) {
+						throw new RuntimeException(ex);
 					}
-					launcherNotifier.set(true);
 				}
 			} else {
 				synchronized (this) {
