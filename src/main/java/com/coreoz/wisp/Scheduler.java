@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import java.util.function.Consumer;
 import org.joda.time.Duration;
 import org.joda.time.Instant;
 import org.slf4j.Logger;
@@ -156,7 +157,22 @@ public class Scheduler {
 	 * scheduled twice whereas the corresponding job status is not {@link JobStatus#DONE}
 	 */
 	public Job schedule(Runnable runnable, Schedule when) {
-		return schedule(null, runnable, when);
+		return schedule(null, runnable, when, null);
+	}
+
+	/**
+	 * Schedule the executions of a process.
+	 *
+	 * @param runnable The process to be executed at a schedule
+	 * @param when The {@link Schedule} at which the process will be executed
+	 * @param onJobStatusChanged A {@link Consumer} for job status change
+	 * @return The corresponding {@link Job} created.
+	 * @throws NullPointerException if {@code runnable} or {@code when} are {@code null}
+	 * @throws IllegalArgumentException if the same instance of {@code runnable} is
+	 * scheduled twice whereas the corresponding job status is not {@link JobStatus#DONE}
+	 */
+	public Job schedule(Runnable runnable, Schedule when, Consumer<JobStatus> onJobStatusChanged) {
+		return schedule(null, runnable, when, onJobStatusChanged);
 	}
 
 	/**
@@ -169,18 +185,26 @@ public class Scheduler {
 	 * @param nullableName The name of the created job
 	 * @param runnable The process to be executed at a schedule
 	 * @param when The {@link Schedule} at which the process will be executed
+	 * @param onJobStatusChanged A {@link Consumer} for job status change
 	 * @return The corresponding {@link Job} created.
 	 * @throws NullPointerException if {@code runnable} or {@code when} are {@code null}
 	 * @throws IllegalArgumentException if the same {@code nullableName} is
 	 * scheduled twice whereas the corresponding job status is not {@link JobStatus#DONE}
 	 */
-	public Job schedule(String nullableName, Runnable runnable, Schedule when) {
+	public Job schedule(String nullableName,
+						Runnable runnable,
+						Schedule when,
+						Consumer<JobStatus> onJobStatusChanged) {
 		Objects.requireNonNull(runnable, "Runnable must not be null");
 		Objects.requireNonNull(when, "Schedule must not be null");
 
 		String name = nullableName == null ? runnable.toString() : nullableName;
 
 		Job job = prepareJob(name, runnable, when);
+		if (onJobStatusChanged != null) {
+			job.onJobStatusChanged(onJobStatusChanged);
+		}
+
 		long currentTimeInMillis = timeProvider.currentTime();
 		if(when.nextExecutionInMillis(
 			currentTimeInMillis,

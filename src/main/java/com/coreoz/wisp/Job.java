@@ -1,5 +1,6 @@
 package com.coreoz.wisp;
 
+import java.util.function.Consumer;
 import org.joda.time.Instant;
 
 import com.coreoz.wisp.schedule.Schedule;
@@ -23,6 +24,7 @@ public class Job {
 	private Schedule schedule;
 	private final Runnable runnable;
 	private Runnable runningJob;
+	private Consumer<JobStatus> onJobStatusChanged;
 
 	// public API
 
@@ -106,6 +108,7 @@ public class Job {
 
 	void status(JobStatus status) {
 		this.status = status;
+		onJobStatusChanged.accept(this.status);
 	}
 
 	void nextExecutionTimeInMillis(long nextExecutionTimeInMillis) {
@@ -140,6 +143,10 @@ public class Job {
 		return runningJob;
 	}
 
+	public void onJobStatusChanged(Consumer<JobStatus> onJobStatusChanged) {
+		this.onJobStatusChanged = onJobStatusChanged;
+	}
+
 	// toString
 
 	@Override
@@ -147,5 +154,4 @@ public class Job {
 		return "Job " + name + " [" + status + "] - will run " + schedule
 				+ " - next execution at " + Instant.ofEpochMilli(nextExecutionTimeInMillis);
 	}
-
 }
