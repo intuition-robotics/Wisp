@@ -108,7 +108,10 @@ public class Job {
 
 	void status(JobStatus status) {
 		this.status = status;
-		onJobStatusChanged.accept(this.status);
+
+		if(onJobStatusChanged != null) {
+			onJobStatusChanged.accept(this.status);
+		}
 	}
 
 	void nextExecutionTimeInMillis(long nextExecutionTimeInMillis) {

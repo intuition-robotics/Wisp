@@ -176,6 +176,21 @@ public class Scheduler {
 	}
 
 	/**
+	 * Schedule the executions of a process.
+	 *
+	 * @param nullableName The name of the created job
+	 * @param runnable The process to be executed at a schedule
+	 * @param when The {@link Schedule} at which the process will be executed
+	 * @return The corresponding {@link Job} created.
+	 * @throws NullPointerException if {@code runnable} or {@code when} are {@code null}
+	 * @throws IllegalArgumentException if the same instance of {@code runnable} is
+	 * scheduled twice whereas the corresponding job status is not {@link JobStatus#DONE}
+	 */
+	public Job schedule(String nullableName, Runnable runnable, Schedule when) {
+		return schedule(nullableName, runnable, when, null);
+	}
+
+	/**
 	 * Schedule the executions of a process.<br>
 	 * <br>
 	 * If a job already exists with the same name and has the status {@link JobStatus#DONE},
