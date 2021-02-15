@@ -430,7 +430,7 @@ public class Scheduler {
 				launcherNotifier.notify();
 			}
 		} else {
-			logger.info(
+			logger.debug(
 				"Job '{}' will not be executed again since its next execution time, {}ms, is planned in the past",
 				job.name(),
 				Instant.ofEpochMilli(job.nextExecutionTimeInMillis())
@@ -441,6 +441,8 @@ public class Scheduler {
 			if(cancelHandle != null) {
 				cancelHandle.complete(job);
 			}
+
+			indexedJobsByName.remove(job.name());
 		}
 	}
 

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'com.coreoz.ir'
-version = '2.1.5'
+version = '2.1.6'
 description = 'Wisp Scheduler'
 sourceCompatibility = '1.8'
 
